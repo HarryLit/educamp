@@ -21,7 +21,17 @@
                 </ul>
             </div>
             <div>
-                
+                <ul>
+                    <li v-for="(item) in checkedData" :key="item.keyName">
+                        <div><span>{{item.name}}</span><input type="checkbox" v-model="item.check"></div>
+                        
+                        <ul>
+                            <li v-for="(itemA) in item.list" :key="itemA.keyName">
+                                <span>{{itemA.name}}</span><input type="checkbox" v-model="itemA.check">
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </div>
         </div>
        
@@ -35,28 +45,39 @@ let data = [
     {   
         name: '餐饮',
         keyName: 'food',
+        check: false,
         list: [
             {
                 name: '第一分组',
-                keyName: 'firstGorups'
+                keyName: 'firstGorups',
+                check: false,
             },
             {
                 name: '第二分组',
-                keyName: 'secondGorups'
+                keyName: 'secondGorups',
+                check: false,
             }
         ]
     },
     {   
         name: '购物',
         keyName: 'shopping',
+        check: false,
         list: [
             {
                 name: '第一分组',
-                keyName: 'firstGorups'
+                keyName: 'firstGorups',
+                check: false,
             },
             {
                 name: '第二分组',
-                keyName: 'secondGorups'
+                keyName: 'secondGorups',
+                check: false,
+            },
+            {
+                name: '第二分组',
+                keyName: 'thirdGorups',
+                check: false,
             }
         ]
     },
@@ -69,41 +90,86 @@ export default {
     data(){
         return {
             data: data,         // 从模拟数据引入的 data
-            checkList: [],      // 记录选中的列表
+            oldData: [],        // 旧数据
+            checkedData: [],    // 记录右边展示的数据
             checkAll: false,    // 记录全选
         }
     },
     computed: {
-        checkedData(){
-            let data = JSON.parse(JSON.stringify(this.data));
-            data = data.filter(item => {
-                if(item.check){
-                    return true;
-                }
-                let checkNone = true;
-                item = item.list.filter(item => {
-                    if(item.check){
-                        checkNone = false;
+        
+    },
+    watch:{
+        // 监听 data 变化
+        data: {
+            handler(data){
+                data.forEach((item, i) => {
+                    if(item.check != this.oldData[i].check){
+                        item.list.forEach(listItem => {
+                            listItem.check = item.check;
+                        })
                     }
-                    return item.check
+                    else{
+                        let checkAll = true;
+                        item.list.forEach(listItem => {
+                            if(!listItem.check){
+                                checkAll = false;
+                            }
+                        })
+                        item.check = checkAll;
+                    }
                 })
-                return !checkNone;
-            })
-            console.log(data);
-            return data;
+                let checkAll = true;
+                data.forEach(item => {
+                    if(!item.check){
+                        checkAll = false;
+                    }
+                })
+                this.checkAll = checkAll;
+                this.oldData = JSON.parse(JSON.stringify(data))
+                // 过滤右边显示的数据
+                this.checkDataWatcher(data)
+            },
+            deep: true,
+        },
+        // 监听全选变化
+        checkAll(val){
+            this.data.forEach(item => item.check = val)
         }
     },
     created() {
+        // 给拿到的数据添加 check 属性
         this.data.forEach(item => {
             this.$set(item, 'check', false)
-            // item.check = false;
             item.list.forEach(item => {
                 this.$set(item, 'check', false)
-                // item.check = false;
             });
         })
-        console.log(this.data)
-    } 
+        // 把原始数据存起来，用来对比变化
+        this.oldData = JSON.parse(JSON.stringify(this.data));
+    },
+    methods: {
+        checkDataWatcher(data){
+            let newData = [];
+            data = JSON.parse(JSON.stringify(data)); // 先复制下来，不能改动原来的数据
+            data.forEach((item, i) => {
+                if(item.check){
+                    newData.push(item);
+                    return;
+                }
+                let checkNone = true;
+                let newItem = item;
+                newItem.list = item.list.filter(listItem => {
+                    if(listItem.check){
+                        checkNone = false;
+                    }
+                    return listItem.check;
+                })
+                !checkNone && newData.push(newItem);
+            })
+            console.log(newData);
+            this.checkedData = newData;
+        }
+    }
 }
 </script>
 

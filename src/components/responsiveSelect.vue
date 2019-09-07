@@ -1,7 +1,38 @@
 <template>
-    <article>
-        
-    </article>
+    <div>
+        <p>商圈门店</p>
+        <div class="container">
+            <div >
+                <div>
+                    <input type="search" placeholder="请输入门店名称"><button>搜索</button>
+                </div>
+
+                <div><span>全选</span><input type="checkbox" v-model="checkAll"/></div>
+                <ul>
+                    <li v-for="(item) in data" :key="item.keyName">
+                        <div><span>{{item.name}}</span><input type="checkbox" v-model="item.check"/></div>
+                        <ul>
+                            <li v-for="(itemA) in item.list" :key="itemA.keyName">
+                                <span>{{itemA.name}}</span><input type="checkbox" v-model="itemA.check"/>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <ul>
+                    <li v-for="(item) in data" :key="item.keyName" :style="item.list | showTitle">
+                        <div><span>{{item.name}}</span><input type="checkbox" :checked="true" @click="deleteList(item)"></div>
+                        <ul>
+                            <li v-for="(itemA) in item.list" v-show="itemA.check" :key="itemA.keyName">
+                                <span>{{itemA.name}}</span><input type="checkbox" v-model="itemA.check">
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -15,12 +46,12 @@ let data = [
         list: [
             {
                 name: '第一分组',
-                keyName: 'firstGorups',
+                keyName: 'firstGroups',
                 check: false,
             },
             {
                 name: '第二分组',
-                keyName: 'secondGorups',
+                keyName: 'secondGroups',
                 check: false,
             }
         ]
@@ -32,24 +63,24 @@ let data = [
         list: [
             {
                 name: '第一分组',
-                keyName: 'firstGorups',
+                keyName: 'firstGroups',
                 check: false,
             },
             {
                 name: '第二分组',
-                keyName: 'secondGorups',
+                keyName: 'secondGroups',
                 check: false,
             },
             {
                 name: '第二分组',
-                keyName: 'thirdGorups',
+                keyName: 'thirdGroups',
                 check: false,
             }
         ]
     },
-]
+];
 
-Array.isArray(data)
+Array.isArray(data);
 
 export default {
     name: "index",
@@ -69,7 +100,7 @@ export default {
         data: {
             handler(data){
                 data.forEach((item, i) => {
-                    if(item.check != this.oldData[i].check){
+                    if(item.check !== this.oldData[i].check){
                         item.list.forEach(listItem => {
                             listItem.check = item.check;
                         })
@@ -83,7 +114,7 @@ export default {
                         })
                         item.check = checkAll;
                     }
-                })
+                });
                 let checkAll = true;
                 data.forEach(item => {
                     if(!item.check){
@@ -109,7 +140,7 @@ export default {
             item.list.forEach(item => {
                 this.$set(item, 'check', false)
             });
-        })
+        });
         // 把原始数据存起来，用来对比变化
         this.oldData = JSON.parse(JSON.stringify(this.data));
     },
@@ -129,14 +160,14 @@ export default {
                         checkNone = false;
                     }
                     return listItem.check;
-                })
+                });
                 !checkNone && newData.push(newItem);
-            })
+            });
             console.log(newData);
             this.checkedData = newData;
         },
-        delectList(item){
-            console.log(item)
+        deleteList(item){
+            console.log(item);
             item.list.forEach(item => {
                 item.check = false;
             })
@@ -150,7 +181,7 @@ export default {
                 if(item.check){
                     itemNoneSelect = "display: block;"
                 }
-            })
+            });
             return itemNoneSelect
         }
     }
